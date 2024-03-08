@@ -1,12 +1,22 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(P_NAME mini-debugger)
-project(${P_NAME} VERSION 1.0.0 LANGUAGES CXX)
+project(mini-debugger LANGUAGES CXX C)
 
 add_compile_options(-Wall -Wextra -Og)
-include_directories(linenoise)
 
-add_subdirectory(linenoise)
+add_executable(${PROJECT_NAME} "main.cpp")
 
-add_executable(${P_NAME} main.cpp)
-target_link_libraries(${P_NAME} linenoise)
+add_library(linenoise STATIC "linenoise/linenoise.c")
+target_link_libraries(${PROJECT_NAME} linenoise)
+include_directories("linenoise")
+
+add_custom_target(libelfin
+    COMMAND make
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/libelfin
+)
+target_link_libraries(${PROJECT_NAME}
+    "${PROJECT_SOURCE_DIR}/libelfin/elf/libelf++.a"
+    "${PROJECT_SOURCE_DIR}/libelfin/dwarf/libdwarf++.a"
+)
+add_dependencies(${PROJECT_NAME} libelfin)
+include_directories("libelfin")
