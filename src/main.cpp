@@ -1,3 +1,4 @@
+#include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -6,6 +7,7 @@
 
 #include "linenoise.h"
 // #include "elf/elf++.hh"
+#include "debugger.hpp"
 
 using std::cout, std::endl;
 
@@ -31,6 +33,7 @@ int main(int argc, char* argv[]) {
          * before the new program begins execution.
          */
         ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);  // allow its parent to trace it
+        personality(ADDR_NO_RANDOMIZE);               // disable ASLR
         execl(prog, prog, nullptr);                   // execute the given program
 
         // execl() return only if it fails
@@ -40,16 +43,11 @@ int main(int argc, char* argv[]) {
         // parent, tracer
         cout << "Child pid: " << pid << endl;
 
-        int wait_status;
-        auto options = 0;
-        waitpid(pid, &wait_status, options);
+        Debugger dbg(pid, prog);
 
         char* line = nullptr;
         while ((line = linenoise("minidbg> ")) != nullptr) {
-            cout << "Got: " << line << endl;
-
-            ptrace(PTRACE_CONT, pid, nullptr, nullptr);
-
+            dbg.command(line);
             linenoiseHistoryAdd(line);
             linenoiseFree(line);
         }
