@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         // parent, tracer
         cout << "Child pid: " << pid << endl;
 
-        Debugger dbg(pid, prog);
+        debugger dbg(pid, prog);
 
         char* line = nullptr;
         while ((line = linenoise("minidbg> ")) != nullptr) {

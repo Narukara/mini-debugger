@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <cstdint>
 
-class Breakpoint {
+class breakpoint {
     pid_t pid;
     intptr_t addr;
     uint64_t origin_data;
@@ -12,11 +12,11 @@ class Breakpoint {
     constexpr static uint8_t int3 = 0xcc;
 
    public:
-    Breakpoint(pid_t pid, intptr_t addr);
-    Breakpoint(Breakpoint& b) = delete;
-    Breakpoint(Breakpoint&& b);
-    Breakpoint& operator=(Breakpoint& rhs) = delete;
-    ~Breakpoint();
+    breakpoint(pid_t pid, intptr_t addr);
+    breakpoint(breakpoint& b) = delete;
+    breakpoint(breakpoint&& b);
+    breakpoint& operator=(breakpoint& rhs) = delete;
+    ~breakpoint();
 
     void enable();
     void disable();
