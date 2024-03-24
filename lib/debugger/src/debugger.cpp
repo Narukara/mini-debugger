@@ -39,6 +39,14 @@ debugger::debugger(pid_t pid, const string& name) : pid(pid), name(name) {
     eval_status(status);
 }
 
+uint64_t debugger::read_memory(uint64_t addr) {
+    return ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
+}
+
+void debugger::write_memory(uint64_t addr, uint64_t data) {
+    ptrace(PTRACE_POKEDATA, pid, addr, data);
+}
+
 void debugger::command(const string& cmd) {
     auto w = split(cmd);
     if (is_prefix(w[0], "continue")) {
@@ -48,6 +56,19 @@ void debugger::command(const string& cmd) {
             print_breakpoints();
         } else if (w.size() == 2) {  // breakpoint address(base 16)
             set_breakpoint(stol(w[1], nullptr, 16));
+        } else if (w.size() == 3) {  // breakpoint enable/disable index
+            size_t index = stol(w[2], nullptr, 10);
+            if (index >= breakpoints.size()) {
+                cout << "Invalid breakpoint index" << endl;
+                return;
+            }
+            auto it = breakpoints.begin();
+            std::advance(it, index);
+            if (is_prefix(w[1], "enable")) {
+                it->second.enable();
+            } else if (is_prefix(w[1], "disable")) {
+                it->second.disable();
+            }
         }
     } else if (is_prefix(w[0], "register")) {
         if (w.size() == 1) {  // register
@@ -68,6 +89,15 @@ void debugger::command(const string& cmd) {
             auto val = stol(w[2], nullptr, 0);  // 0 means auto-detect base
             set_register(*r, val);
         }
+    } else if (is_prefix(w[0], "memory")) {
+        if (w.size() == 2) {  // memory address(base 16)
+            auto addr = stol(w[1], nullptr, 16);
+            cout << "0x" << std::hex << read_memory(addr) << endl;
+        } else if (w.size() == 3) {  // memory address(base 16) value
+            auto addr = stol(w[1], nullptr, 16);
+            auto val = stol(w[2], nullptr, 0);  // 0 means auto-detect base
+            write_memory(addr, val);
+        }
     } else if (is_prefix(w[0], "quit")) {
         exit(0);
     } else {
@@ -76,13 +106,32 @@ void debugger::command(const string& cmd) {
 }
 
 void debugger::continue_execution() {
+    /**
+     * handler for breakpoint
+     *              rip
+     *               v
+     * xxx xxx int3 xxx xxx
+     */
+    auto breakpoint_addr = get_pc() - 1;
+    auto it = breakpoints.find(breakpoint_addr);
+    if (it != breakpoints.end()) {
+        auto& bp = it->second;
+        set_pc(breakpoint_addr);
+        if (bp.is_enabled()) {
+            bp.disable();
+            ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
+            waitpid(pid, nullptr, 0);
+            bp.enable();
+        }
+    }
+    // continue execution
     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
     int status;
     waitpid(pid, &status, 0);
     eval_status(status);
 }
 
-void debugger::set_breakpoint(intptr_t addr) {
+void debugger::set_breakpoint(uintptr_t addr) {
     cout << "Set breakpoint at address 0x" << std::hex << addr << endl;
     breakpoint bp(pid, addr);
     bp.enable();
@@ -90,7 +139,9 @@ void debugger::set_breakpoint(intptr_t addr) {
 }
 
 void debugger::print_breakpoints() {
+    size_t i = 0;
     for (const auto& [addr, bp] : breakpoints) {
+        cout << std::dec << i++ << ": ";
         cout << "0x" << std::hex << addr << " " << (bp.is_enabled() ? "enabled" : "disabled") << endl;
     }
 }

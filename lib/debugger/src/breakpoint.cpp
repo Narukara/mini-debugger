@@ -2,7 +2,7 @@
 
 #include "breakpoint.hpp"
 
-breakpoint::breakpoint(pid_t pid, intptr_t addr) : pid(pid), addr(addr), enabled(false) {
+breakpoint::breakpoint(pid_t pid, uintptr_t addr) : pid(pid), addr(addr), enabled(false) {
     origin_data = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
 }
 

@@ -84,14 +84,20 @@ const std::array<reg_info, reg_num> all_reg_info = {{
 class debugger {
     pid_t pid;
     std::string name;
-    std::unordered_map<intptr_t, breakpoint> breakpoints;
+    std::unordered_map<uintptr_t, breakpoint> breakpoints;
+
+    uint64_t read_memory(uintptr_t addr);
+    void write_memory(uintptr_t addr, uint64_t data);
+
+    uint64_t get_pc() { return get_register(reg::rip); }
+    void set_pc(uint64_t pc) { set_register(reg::rip, pc); }
 
    public:
     debugger(pid_t pid, const std::string& name);
 
     void command(const std::string& cmd);
     void continue_execution();
-    void set_breakpoint(intptr_t addr);
+    void set_breakpoint(uintptr_t addr);
     void print_breakpoints();
 
     static void eval_status(int status);
