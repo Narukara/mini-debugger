@@ -2,44 +2,40 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "cmake -> make",
+            "label": "configure",
             "type": "shell",
             "command": "cmake",
+            "problemMatcher": [],
             "args": [
-                "-B",
-                "build"
+                "--preset",
+                "default"
             ],
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-            }
         },
         {
-            "label": "make",
-            "type": "shell",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}/build"
-            },
-            "args": [],
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-            }
-        },
-        {
-            "label": "cmake build",
+            "label": "build",
             "type": "shell",
             "command": "cmake",
+            "problemMatcher": [],
             "args": [
                 "--build",
-                "build"
+                "--preset",
+                "default"
             ],
-            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "cmake",
+            "problemMatcher": [],
+            "args": [
+                "--build",
+                "--preset",
+                "clean"
+            ]
         },
         {
             "label": "run",

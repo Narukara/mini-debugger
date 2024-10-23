@@ -1,0 +1,29 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default",
+            "generator": "Unix Makefiles",
+            "binaryDir": "build"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "displayName": "Default",
+            "configurePreset": "default",
+            "targets": [
+                "all"
+            ]
+        },
+        {
+            "name": "clean",
+            "displayName": "Clean",
+            "configurePreset": "default",
+            "targets": [
+                "clean"
+            ]
+        }
+    ]
+}

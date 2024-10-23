@@ -3,6 +3,7 @@ project(mini-debugger LANGUAGES CXX C)
 include(CTest)
 
 add_compile_options(-Wall -Wextra -Og)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(${PROJECT_NAME} "src/main.cpp")
 
 # lib/linenoise
