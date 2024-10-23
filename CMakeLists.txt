@@ -26,3 +26,6 @@ include_directories("lib/libelfin")
 # lib/debugger
 add_subdirectory("lib/debugger")
 target_link_libraries(${PROJECT_NAME} debugger)
+
+# sample program being debugged
+add_subdirectory("lib/sample")

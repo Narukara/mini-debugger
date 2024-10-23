@@ -10,6 +10,7 @@
 #include "breakpoint.hpp"
 
 // same order as in user_regs_struct
+// see <sys/user.h>
 enum class reg {
     r15,
     r14,

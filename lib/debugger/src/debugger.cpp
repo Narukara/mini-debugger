@@ -39,11 +39,11 @@ debugger::debugger(pid_t pid, const string& name) : pid(pid), name(name) {
     eval_status(status);
 }
 
-uint64_t debugger::read_memory(uint64_t addr) {
+uint64_t debugger::read_memory(uintptr_t addr) {
     return ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
 }
 
-void debugger::write_memory(uint64_t addr, uint64_t data) {
+void debugger::write_memory(uintptr_t addr, uint64_t data) {
     ptrace(PTRACE_POKEDATA, pid, addr, data);
 }
 
@@ -68,6 +68,8 @@ void debugger::command(const string& cmd) {
                 it->second.enable();
             } else if (is_prefix(w[1], "disable")) {
                 it->second.disable();
+            } else {
+                cout << "Unknown command" << endl;
             }
         }
     } else if (is_prefix(w[0], "register")) {
@@ -78,6 +80,7 @@ void debugger::command(const string& cmd) {
             }
             return;
         }
+        // register reg_name ...
         auto r = str_to_reg(w[1]);
         if (!r) {
             cout << "Unknown register" << endl;
@@ -100,6 +103,15 @@ void debugger::command(const string& cmd) {
         }
     } else if (is_prefix(w[0], "quit")) {
         exit(0);
+    } else if (is_prefix(w[0], "help")) {
+        cout << "Available commands:" << endl;
+        cout << "  continue" << endl;
+        cout << "  breakpoint [address]" << endl;
+        cout << "  breakpoint enable|disable index" << endl;
+        cout << "  register [reg_name [value]]" << endl;
+        cout << "  memory address [value]" << endl;
+        cout << "  quit" << endl;
+        cout << "  help" << endl;
     } else {
         cout << "Unknown command" << endl;
     }
